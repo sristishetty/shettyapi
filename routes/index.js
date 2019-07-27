@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('./../models/User');
-var { validateRequest } = require('./../utils/index');
+var { validateRequest, sendMail } = require('./../utils/index');
 var { register } = require('./../validation_rules');
 
 /* POST login */
@@ -27,12 +27,21 @@ router.post(
           data: ""
         });
       }
-      
+
       User.create(req.body,(err, data)=>{
         if(err) return next(err);
         res.status(200).json({
           message: "User Registered Successfully",
           data: ""
+        });
+        sendMail({
+          from: 'admin@express-API.com',
+          to: data.email,
+          subject: 'Account Verification Mail',
+          text: 'Here is your link'
+        },function(err,data){
+          if(err) return next(err);
+          console.log("Mail Delivery Receipt----->",data);
         });
       });
     });
