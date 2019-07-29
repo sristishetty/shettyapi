@@ -5,7 +5,12 @@ var bcrypt = require('bcrypt');
 var userSchema = new Schema({
     userName: String,
     email: String,
-    password: String
+    password: String,
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationCode: String
 });
 
 userSchema.pre('save', function(next){

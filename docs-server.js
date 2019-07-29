@@ -7,7 +7,7 @@ app.set('view engine','html');
 app.use(express.static(path.join(__dirname, 'docs')));
 
 app.get("*",function(req, res){
-    res.render('docs/index.html');
+    res.sendFile('docs/index.html');
 });
 
 app.listen(process.env.DOCS_PORT,function(){

@@ -12,7 +12,7 @@
     "description": "apiDoc for express server",
     "apidoc": {
       "title": "Express-API Docs",
-      "url" : ""
+      "url": ""
     }
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "mongoose": "^5.6.7",
     "morgan": "~1.9.1",
     "nodemailer": "^6.3.0",
+    "randomstring": "^1.1.5",
     "validatorjs": "^3.15.1"
   }
 }
