@@ -3,9 +3,13 @@ var router = express.Router();
 var { 
   register: registerController,
   accountVerification: accountVerificationController,
-  login: loginController
+  login: loginController,
+  profile: profileController
 } = require('./../controllers/index');
-var { validateRequest } = require('./../utils/index');
+var { 
+  validateRequest,
+  authentication
+ } = require('./../utils/index');
 var { 
   register,
   login 
@@ -103,6 +107,35 @@ router.post(
 router.get(
   '/account/verification/:code',
   accountVerificationController
+);
+
+/**
+ * @api {get} /profile Request Profile View
+ * @apiName Profile View
+ * @apiGroup Index
+ *
+ * @apiSuccess {String} message Activity Successfull
+ * @apiSuccess {String} data 
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "Activity Successfull",
+ *       "data": userData
+ *     }
+ *
+ * @apiError AuthenticationError The user is not authorised or expired token.
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 442 Authentication Error
+ *     {
+ *       "message": "The user is not authorised or expired token."
+ *     }
+ */
+router.get(
+  '/profile',
+  authentication,
+  profileController
 );
 
 module.exports = router;

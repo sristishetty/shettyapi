@@ -113,5 +113,15 @@ module.exports = {
         });
       });
     });
+  },
+  profile: function (req, res, next) {
+    var { userName, email } = req.user
+    return res.status(200).json({
+      message: "Activity Successfull",
+      data: {
+        userName,
+        email
+      }
+    });
   }
 };
