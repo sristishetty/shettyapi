@@ -2,14 +2,47 @@ var express = require('express');
 var router = express.Router();
 var { 
   register: registerController,
-  accountVerification: accountVerificationController
+  accountVerification: accountVerificationController,
+  login: loginController
 } = require('./../controllers/index');
 var { validateRequest } = require('./../utils/index');
-var { register } = require('./../validation_rules');
+var { 
+  register,
+  login 
+  } = require('./../validation_rules');
 
-/* POST login */
-router.post('/login', function(req, res, next) {
-});
+/**
+ * @api {post} /login Request User Login
+ * @apiName Login
+ * @apiGroup Index
+ *
+ * @apiParam {String} email Email of the user
+ * @apiParam {String} password Password of the user
+ *
+ * @apiSuccess {String} message User Login Successfully
+ * @apiSuccess {String} data 
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "User Login Successfully",
+ *       "data": {
+ *          userName: "Your username"
+ *        }
+ *     }
+ *
+ * @apiError ValidationError Please Enter The Data in Specified Format.
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 422 Unprocessable Entity
+ *     {
+ *       "message": "Validation Error Message"
+ *     }
+ */
+router.post('/login', 
+  validateRequest(login),
+  loginController
+);
 
 /**
  * @api {post} /register Request User Registration

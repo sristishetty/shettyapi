@@ -1,4 +1,5 @@
 var randomstring = require("randomstring");
+var jwt = require('jsonwebtoken');
 var User = require('./../models/User');
 var { sendMail } = require('./../utils/index');
 
@@ -48,35 +49,69 @@ module.exports = {
     });
   },
   accountVerification: function (req, res, next) {
-    User.findOne({
+
+    User.updateOne({
       verificationCode: req.params.code
+    }, {
+        $set: {
+          isVerified: true
+        },
+        $unset: {
+          verificationCode: ''
+        }
+      }, function (err, result) {
+        if (err) return next(err);
+
+
+        if (!user) {
+          return res.status(422).json({
+            message: "Link Expired or Invalid",
+            data: ""
+          });
+        }
+
+        res.status(200).json({
+          "message": "Account Verified Successfully",
+          "data": ""
+        });
+      });
+  },
+  login: function (req, res, next) {
+    var { email, password } = req.body;
+    User.findOne({
+      email,
+      isVerified: true
     }, function (err, user) {
       if (err) return next(err);
 
       if (!user) {
-        return res.status(422).json({
-          message: "Link Expired or Invalid",
+        return res.status(200).json({
+          message: "User Not Found",
           data: ""
         });
       }
 
-      User.updateOne({
-        _id: user._id
-      }, {
-          $set: {
-            isVerified: true
-          },
-          $unset: {
-            verificationCode: ''
-          }
-        }, function (err, result) {
-          if (err) return next(err);
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) return next(err);
 
-          res.status(200).json({
-            "message": "Account Verified Successfully",
-            "data": ""
+        if (isMatch) {
+          return res.status(200).json({
+            message: "User Login Successfully",
+            data: {
+              userName: user.userName,
+              email: user.email,
+              token: jwt.sign({
+                id: user._id
+              }, process.env.JWT_SECRET)
+            }
           });
+        }
+
+        return res.status(200).json({
+          message: "Email or Password Incorrect",
+          data: ""
         });
+      });
     });
   }
 };
