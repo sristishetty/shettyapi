@@ -1,5 +1,6 @@
 var randomstring = require("randomstring");
 var jwt = require('jsonwebtoken');
+var bcrypt = require("bcrypt");
 var User = require('./../models/User');
 var { sendMail } = require('./../utils/index');
 
@@ -122,6 +123,102 @@ module.exports = {
         userName,
         email
       }
+    });
+  },
+  forgotPassword: function (req, res, next) {
+    User.findOne({
+      email: req.body.email,
+      isVerified: true
+    }, function (err, user) {
+      if (err) return next(err);
+
+      if (!user) {
+        return res.status(200).json({
+          message: "User Not Found",
+          data: ""
+        });
+      }
+
+      var resetCode = randomstring.generate({
+        length: 30,
+        charset: 'alphanumeric'
+      });
+      
+      var resetLink = `${resetCode}.${user._id}.${Date.now()}`
+
+      User.updateOne({
+        _id: user._id
+      },{
+        $set:{
+          resetLink
+        }
+      },function(err, data){
+        if (err) return next(err);
+
+        res.status(200).json({
+          message: "An email is sent to your inbox, if it doesn't appear check your spam folder",
+          data: ""
+        });
+
+        sendMail({
+          from: process.env.SMTP_FROM_MAIL,
+          to: user.email,
+          subject: 'Reset Your Password',
+          text: `Here is your link 
+            http://localhost:${process.env.PORT}/reset_password/${resetLink}`
+        }, function (err, data) {
+          if (err) return next(err);
+          console.log("Mail Delivery Receipt----->", data);
+        });
+      });
+    });
+  },
+  resetPassword: function (req, res, next) {
+    var { resetLink } = req.params;
+    var [, userId, date] = resetLink.split('.');
+    var { password } = req.body;
+    User.findOne({
+      resetLink
+    }, function(err, user){
+      if (err) return next(err);
+
+      if (
+        !user || 
+        (
+          (Date.now() - date * 1) > 3 * 60 * 60 * 1000
+        )
+      ) {
+        return res.status(200).json({
+          message: "Link Expired or Invalid",
+          data: ""
+        });
+      }
+  
+      bcrypt.hash(
+        password,
+        10,
+        function (err, hash) {
+          if (err) return next(err);
+  
+          User.updateOne({
+            _id: userId
+          },{
+            $set:{
+              password: hash
+            },
+            $unset:{
+              resetLink: ''
+            }
+          }, function(err, user){
+            if (err) return next(err);
+  
+            res.status(200).json({
+              message: "Password Set Successfully",
+              data: ""
+            });
+  
+          });
+        });
     });
   }
 };

@@ -4,7 +4,9 @@ var {
   register: registerController,
   accountVerification: accountVerificationController,
   login: loginController,
-  profile: profileController
+  profile: profileController,
+  forgotPassword: forgotPasswordController,
+  resetPassword: resetPasswordController
 } = require('./../controllers/index');
 var { 
   validateRequest,
@@ -12,7 +14,9 @@ var {
  } = require('./../utils/index');
 var { 
   register,
-  login 
+  login,
+  forgotPassword,
+  resetPassword
   } = require('./../validation_rules');
 
 /**
@@ -136,6 +140,70 @@ router.get(
   '/profile',
   authentication,
   profileController
+);
+
+/**
+ * @api {post} /forgot_password Request Forgot Password
+ * @apiName Forgot Password
+ * @apiGroup Index
+ *
+ * @apiParam {String} email Email of the user'
+ * 
+ * @apiSuccess {String} message An email is sent to your inbox, if it doesn't appear check your spam folder
+ * @apiSuccess {String} data 
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "An email is sent to your inbox, if it doesn't appear check your spam folder",
+ *       "data": ""
+ *     }
+ *
+ * @apiError ValidationError Validation Error Message
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 422 Validation Error
+ *     {
+ *       "message": "Validation Error Message"
+ *     }
+ */
+router.post(
+  '/forgot_password',
+  validateRequest(forgotPassword),
+  forgotPasswordController
+);
+
+/**
+ * @api {post} /reset_password/:resetLink Request Reset Password
+ * @apiName Reset Password
+ * @apiGroup Index
+ *
+ * @apiParam {String} password Password the user
+ * @apiParam {String} confirmPassword Confirm Password of the user
+ * @apiParam {String} resetLink Reset Link sent to the user
+ * 
+ * @apiSuccess {String} message Password Set Successfully
+ * @apiSuccess {String} data 
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "Password Set Successfully",
+ *       "data": ""
+ *     }
+ *
+ * @apiError ValidationError Validation Error Message
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 422 Validation Error
+ *     {
+ *       "message": "Validation Error Message"
+ *     }
+ */
+router.post(
+  '/reset_password/:resetLink',
+  validateRequest(resetPassword),
+  resetPasswordController
 );
 
 module.exports = router;

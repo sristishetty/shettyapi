@@ -10,7 +10,8 @@ var userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    verificationCode: String
+    verificationCode: String,
+    resetLink: String
 });
 
 userSchema.pre('save', function(next){
