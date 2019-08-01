@@ -60,11 +60,11 @@ module.exports = {
         $unset: {
           verificationCode: ''
         }
-      }, function (err, result) {
+      }, function (err, user) {
         if (err) return next(err);
 
 
-        if (!user) {
+        if (!user.nModified) {
           return res.status(422).json({
             message: "Link Expired or Invalid",
             data: ""
